@@ -89,7 +89,7 @@ typedef struct {
     addr->BA2 = ((phys_addr & 1<<18) >> 18) ^ ((phys_addr & 1<<22) >> 22);
     addr->rank = ((phys_addr & 1<<17) >> 17) ^ ((phys_addr & 1<<21) >> 21);
     addr->dimm = (phys_addr & 1<<16);
-    addr->channel = ((phys_addr & 1<<7) >> 7) ^ ((phys_addr & 1<<8) >> 8) ^ ((phys_addr & 1<<9) >> 9) ^ ((phys_addr & 1<<12) >> 12) ^ ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<18) >> 18) ^ ((phys_addr & 1<<19) >> 19)
+    addr->channel = ((phys_addr & 1<<7) >> 7) ^ ((phys_addr & 1<<8) >> 8) ^ ((phys_addr & 1<<9) >> 9) ^ ((phys_addr & 1<<12) >> 12) ^ ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<18) >> 18) ^ ((phys_addr & 1<<19) >> 19);
     
     return;
 }
