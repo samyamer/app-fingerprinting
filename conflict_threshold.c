@@ -69,16 +69,44 @@ typedef struct {
 #define E_OFFSET 0x01C0
 
 
+
+
+
+// Haswell 1 channel 1 dimms
+ void dram_address(u_int64_t phys_addr, DramAddr* addr){
+    addr->BA0 = ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<17) >> 17);
+    addr->BA1 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<18) >> 18);
+    addr->BA2 = ((phys_addr & 1<<16) >> 16) ^ ((phys_addr & 1<<20) >> 20);
+    addr->rank = ((phys_addr & 1<<15) >> 15) ^ ((phys_addr & 1<<19) >> 19);
+    addr->dimm = 0;
+    addr->channel = 0;
+    
+    return;
+}
+
 // // Haswell 1 channel 2 dimms
 //  void dram_address(u_int64_t phys_addr, DramAddr* addr){
-//     addr->BA0 = ((phys_addr & 1<<14) >> 13) ^ ((phys_addr & 1<<18) >> 18);
+//     addr->BA0 = ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<18) >> 18);
 //     addr->BA1 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<19) >> 19);
 //     addr->BA2 = ((phys_addr & 1<<17) >> 17) ^ ((phys_addr & 1<<21) >> 21);
 //     addr->rank = ((phys_addr & 1<<16) >> 16) ^ ((phys_addr & 1<<20) >> 20);
 //     addr->dimm = (phys_addr & 1<<15);
+// addr->channel = 0;
     
 //     return;
 // }
+
+// Haswell 2 channel 1 dimms
+ void dram_address(u_int64_t phys_addr, DramAddr* addr){
+    addr->BA0 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<18) >> 18);
+    addr->BA1 = ((phys_addr & 1<<15) >> 15) ^ ((phys_addr & 1<<19) >> 19);
+    addr->BA2 = ((phys_addr & 1<<17) >> 17) ^ ((phys_addr & 1<<21) >> 21);
+    addr->rank = ((phys_addr & 1<<16) >> 16) ^ ((phys_addr & 1<<20) >> 20);
+    addr->dimm = 0;
+    addr->channel = ((phys_addr & 1<<7) >> 7) ^ ((phys_addr & 1<<8) >> 8) ^ ((phys_addr & 1<<9) >> 9) ^ ((phys_addr & 1<<12) >> 12) ^ ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<18) >> 18) ^ ((phys_addr & 1<<19) >> 19);
+    
+    return;
+}
 
 
 
