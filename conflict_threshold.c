@@ -156,7 +156,7 @@ void main(void){
             printf("%lu\n",acc_time);
             phys = get_physical_addr((uintptr_t) (mem+i*PAGE_SIZE));
             dram_address(phys, dram);
-            printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank, dram->dimm);
+            printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
             printf("%lx\n",phys);
             printf("--------------------------\n");
 
