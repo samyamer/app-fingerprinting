@@ -68,59 +68,75 @@ typedef struct {
 #define PAGE_SIZE (1<<12)
 #define E_OFFSET 0x01C0
 
-
-
-
-
-// Haswell 1 channel 1 dimms
- void dram_address(u_int64_t phys_addr, DramAddr* addr){
-    addr->BA0 = ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<17) >> 17);
-    addr->BA1 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<18) >> 18);
-    addr->BA2 = ((phys_addr & 1<<16) >> 16) ^ ((phys_addr & 1<<20) >> 20);
-    addr->rank = ((phys_addr & 1<<15) >> 15) ^ ((phys_addr & 1<<19) >> 19);
-    addr->dimm = 0;
-    addr->channel = 0;
-    
-    return;
+bool check_consecutive(u_int64_t mem, u_int64_t size){
+	u_int64_t prev = get_physical_addr(mem);
+	u_int64_t phys;
+	bool out = true;
+	for(u_int64_t i=mem+PAGE_SIZE; i<mem+size; i+= PAGE_SIZE){
+		phys = get_physical_addr(i);
+        // printf("%lx\n",phys);
+		// printf("Vaddr: %lx   Paddr: %lx\n",i, phys);
+		if(phys != prev + PAGE_SIZE){
+			// printf("NOT consecutive");
+			out = false;
+		}
+		prev  = phys;
+	}
+	return out;
+	
 }
 
-// // Haswell 1 channel 2 dimms
+
+
+// // Haswell 1 channel 1 dimms
 //  void dram_address(u_int64_t phys_addr, DramAddr* addr){
-//     addr->BA0 = ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<18) >> 18);
-//     addr->BA1 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<19) >> 19);
-//     addr->BA2 = ((phys_addr & 1<<17) >> 17) ^ ((phys_addr & 1<<21) >> 21);
-//     addr->rank = ((phys_addr & 1<<16) >> 16) ^ ((phys_addr & 1<<20) >> 20);
-//     addr->dimm = (phys_addr & 1<<15);
-// addr->channel = 0;
+//     addr->BA0 = ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<17) >> 17);
+//     addr->BA1 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<18) >> 18);
+//     addr->BA2 = ((phys_addr & 1<<16) >> 16) ^ ((phys_addr & 1<<20) >> 20);
+//     addr->rank = ((phys_addr & 1<<15) >> 15) ^ ((phys_addr & 1<<19) >> 19);
+//     addr->dimm = 0;
+//     addr->channel = 0;
     
 //     return;
 // }
 
-// Haswell 2 channel 1 dimms
- void dram_address(u_int64_t phys_addr, DramAddr* addr){
-    addr->BA0 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<18) >> 18);
-    addr->BA1 = ((phys_addr & 1<<15) >> 15) ^ ((phys_addr & 1<<19) >> 19);
-    addr->BA2 = ((phys_addr & 1<<17) >> 17) ^ ((phys_addr & 1<<21) >> 21);
-    addr->rank = ((phys_addr & 1<<16) >> 16) ^ ((phys_addr & 1<<20) >> 20);
-    addr->dimm = 0;
-    addr->channel = ((phys_addr & 1<<7) >> 7) ^ ((phys_addr & 1<<8) >> 8) ^ ((phys_addr & 1<<9) >> 9) ^ ((phys_addr & 1<<12) >> 12) ^ ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<18) >> 18) ^ ((phys_addr & 1<<19) >> 19);
+// // // Haswell 1 channel 2 dimms
+// //  void dram_address(u_int64_t phys_addr, DramAddr* addr){
+// //     addr->BA0 = ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<18) >> 18);
+// //     addr->BA1 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<19) >> 19);
+// //     addr->BA2 = ((phys_addr & 1<<17) >> 17) ^ ((phys_addr & 1<<21) >> 21);
+// //     addr->rank = ((phys_addr & 1<<16) >> 16) ^ ((phys_addr & 1<<20) >> 20);
+// //     addr->dimm = (phys_addr & 1<<15);
+// // addr->channel = 0;
     
-    return;
-}
+// //     return;
+// // }
 
-
-
-// Haswell 2 channel 2 dimms
- void dram_address(u_int64_t phys_addr, DramAddr* addr){
-    addr->BA0 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<19) >> 19);
-    addr->BA1 = ((phys_addr & 1<<15) >> 15) ^ ((phys_addr & 1<<20) >> 20);
-    addr->BA2 = ((phys_addr & 1<<18) >> 18) ^ ((phys_addr & 1<<22) >> 22);
-    addr->rank = ((phys_addr & 1<<17) >> 17) ^ ((phys_addr & 1<<21) >> 21);
-    addr->dimm = (phys_addr & 1<<16);
-    addr->channel = ((phys_addr & 1<<7) >> 7) ^ ((phys_addr & 1<<8) >> 8) ^ ((phys_addr & 1<<9) >> 9) ^ ((phys_addr & 1<<12) >> 12) ^ ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<18) >> 18) ^ ((phys_addr & 1<<19) >> 19);
+// // Haswell 2 channel 1 dimms
+//  void dram_address(u_int64_t phys_addr, DramAddr* addr){
+//     addr->BA0 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<18) >> 18);
+//     addr->BA1 = ((phys_addr & 1<<15) >> 15) ^ ((phys_addr & 1<<19) >> 19);
+//     addr->BA2 = ((phys_addr & 1<<17) >> 17) ^ ((phys_addr & 1<<21) >> 21);
+//     addr->rank = ((phys_addr & 1<<16) >> 16) ^ ((phys_addr & 1<<20) >> 20);
+//     addr->dimm = 0;
+//     addr->channel = ((phys_addr & 1<<7) >> 7) ^ ((phys_addr & 1<<8) >> 8) ^ ((phys_addr & 1<<9) >> 9) ^ ((phys_addr & 1<<12) >> 12) ^ ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<18) >> 18) ^ ((phys_addr & 1<<19) >> 19);
     
-    return;
-}
+//     return;
+// }
+
+
+
+// // Haswell 2 channel 2 dimms
+//  void dram_address(u_int64_t phys_addr, DramAddr* addr){
+//     addr->BA0 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<19) >> 19);
+//     addr->BA1 = ((phys_addr & 1<<15) >> 15) ^ ((phys_addr & 1<<20) >> 20);
+//     addr->BA2 = ((phys_addr & 1<<18) >> 18) ^ ((phys_addr & 1<<22) >> 22);
+//     addr->rank = ((phys_addr & 1<<17) >> 17) ^ ((phys_addr & 1<<21) >> 21);
+//     addr->dimm = (phys_addr & 1<<16);
+//     addr->channel = ((phys_addr & 1<<7) >> 7) ^ ((phys_addr & 1<<8) >> 8) ^ ((phys_addr & 1<<9) >> 9) ^ ((phys_addr & 1<<12) >> 12) ^ ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<18) >> 18) ^ ((phys_addr & 1<<19) >> 19);
+    
+//     return;
+// }
 
 inline __attribute__((always_inline)) uint64_t 
 row_conflict_time(u_int64_t a, u_int64_t b){
@@ -153,22 +169,30 @@ row_conflict_time(u_int64_t a, u_int64_t b){
 
 void main(void){
     
-    int num_pages=1<<9;
+
+    // eat mem
+    
+
+    
+    int num_pages=100;
     char* mem =  (char *) mmap(NULL, num_pages*PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE| MAP_POPULATE, -1, 0);
 
+    while(!check_consecutive(mem,num_pages*PAGE_SIZE)){
+        mem =  (char *) mmap(NULL, num_pages*PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE| MAP_POPULATE, -1, 0);
+    }
     
     // row conflict timing
 
    
 
-    DramAddr* dram = (DramAddr*) malloc(sizeof(DramAddr));
-    dram_address(get_physical_addr((uintptr_t) mem), dram);
-    printf("page 0 memory\n");
-    printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
-    printf("---------------------------------------------------------------\n");
+    // DramAddr* dram = (DramAddr*) malloc(sizeof(DramAddr));
+    // dram_address(get_physical_addr((uintptr_t) mem), dram);
+    // printf("page 0 memory\n");
+    // printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
+    // printf("---------------------------------------------------------------\n");
 
     uint64_t phys;
-    for(int i=1; i<num_pages; i++){
+    for(int i=1; i<num_pages; i+=2){
         u_int64_t acc_time = 0;
         u_int64_t time;
         int j=0;
@@ -179,16 +203,17 @@ void main(void){
             acc_time+=time;
         }
         acc_time = acc_time/8000;
+        printf("Page %d Acc Time: %ld\n", i, acc_time);
         
-        if(acc_time > 300){
-            printf("%lu\n",acc_time);
-            phys = get_physical_addr((uintptr_t) (mem+i*PAGE_SIZE));
-            dram_address(phys, dram);
-            printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
-            printf("%lx\n",phys);
-            printf("--------------------------\n");
+        // if(acc_time > 300){
+        //     printf("%lu\n",acc_time);
+        //     phys = get_physical_addr((uintptr_t) (mem+i*PAGE_SIZE));
+        //     dram_address(phys, dram);
+        //     printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
+        //     printf("%lx\n",phys);
+        //     printf("--------------------------\n");
 
-        }
+        // }
         
        
     }
