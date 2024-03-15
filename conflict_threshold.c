@@ -203,7 +203,7 @@ void main(void){
             acc_time+=time;
         }
         acc_time = acc_time/8000;
-        printf("Page %d (%lx) Acc Time: %ld\n", i, get_physical_addr(uintptr_t) (mem + i*PAGE_SIZE)),acc_time);
+        printf("Page %d (%lx) Acc Time: %ld\n", i, get_physical_addr((uintptr_t) (mem + i*PAGE_SIZE)),acc_time);
         
         // if(acc_time > 300){
         //     printf("%lu\n",acc_time);
