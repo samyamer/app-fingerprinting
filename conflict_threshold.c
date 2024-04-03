@@ -251,6 +251,8 @@ void main(void){
             if(acc_time > ROW_CONFLICT_TH){
                 printf("Found conflict\n");
                 offset = i;
+                printf("Offset %d\n", offset);
+                break;
             }
             
             // if(acc_time > 300){
@@ -266,7 +268,7 @@ void main(void){
         
         }
 
-        if(offset<32){
+        if(offset<30){
             munmap(mem,num_pages*PAGE_SIZE);
         }else{
             break;
@@ -276,11 +278,12 @@ void main(void){
     printf("Found offset >= 30\n");
     // all the pages up to offset -1 are in the banks that will be probed
 
-    char* addresses[16];
+    char* addresses[15];
 
-    for(int i=0; i<16; i++){
+    for(int i=0; i<15; i++){
         addresses[i] = mem + PAGE_SIZE*(i*2);
     }
+    printf("here");
 
     // PROBE(F+R)
     // int acc_times[16];
@@ -292,27 +295,35 @@ void main(void){
     //     printf("%d\n", acc_times[i]);
     // }
 
-    uint64_t acc_times[16000];
+   
 
     // probe every 2ms cycles
-    uint64_t start = rdtscp();
+    
     int num =0;
-    while((rdtscp() < start + (0x00030000)) && (num < 1000)){
-        for(int i=0; i<16; i++){
-            acc_times[num*16 + i] = probe(addresses[i]);
-        }
-    }
 
-    for(int j=0; j< 1000;j++ ){
-        for(int i=0; i<16; i++){
-            if(i<15){
-                if(acc_times[j*16 + i] < ROW_CONFLICT_TH){
+    int num_probes = 25000;
+    uint64_t acc_times[num_probes*15];
+    uint64_t start = rdtscp();
+    while(num < num_probes ){
+        while(rdtscp() < start + 0x300000){}
+        for(int i=0; i<15; i++){
+            acc_times[num*15 + i] = probe(addresses[i]);
+        }
+        num++;
+        start = rdtscp();
+    }
+    
+
+    for(int j=0; j< num_probes;j++ ){
+        for(int i=0; i<15; i++){
+            if(i<14){
+                if(acc_times[j*15 + i] < ROW_CONFLICT_TH){
                     printf("1,");
                 }else{
                     printf("0,");
                 }
             }else{
-                if(acc_times[j*16 + i] < ROW_CONFLICT_TH){
+                if(acc_times[j*15 + i] < ROW_CONFLICT_TH){
                     printf("1");
                 }else{
                     printf("0");
