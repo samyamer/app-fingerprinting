@@ -33,7 +33,18 @@
 
 #define PAGE_SIZE (1<<12)
 
-#define ROW_CONFLICT_TH 470
+#define ROW_CONFLICT_TH 490
+
+/* Returns Time Stamp Counter (using rdtscp function)*/
+extern inline __attribute__((always_inline))
+uint64_t rdtscp(void) {
+  uint64_t cycles;
+  asm volatile ("rdtscp\n"
+		"shl $32,%%rdx\n"
+		"or %%rdx, %%rax\n"		      
+		: /* outputs */ "=a" (cycles));
+  return cycles;
+}
 
 
 u_int64_t get_physical_addr(uintptr_t virtual_addr){
@@ -85,7 +96,35 @@ bool check_consecutive(u_int64_t mem, u_int64_t size){
 	return out;
 	
 }
+inline __attribute__((always_inline))  
+int probe(char* addr){
+    volatile unsigned int time;
+    // read timestamp
+    // move timestamp to another reg
+    //cpuid
+    // mem access
+    //cpuid
+    // read timestamp
+    //cflush
 
+    asm __volatile__(
+        "clflush 0(%1)\n\t"
+        "mfence\n\t"
+        "rdtsc\n\t"
+        "lfence\n\t"
+        "movl %%eax, %%edi\n\t"
+        "movl (%1), %%eax \n\t"
+        "lfence\n\t"
+        "rdtsc\n\t"
+        "subl %%edi, %%eax\n\t"
+        :"=a"(time)
+        :"c"(addr)
+        :"edi","edx"
+
+    );
+
+    return time;
+}
 
 
 // // Haswell 1 channel 1 dimms
@@ -175,48 +214,125 @@ void main(void){
 
     
     int num_pages=100;
-    char* mem =  (char *) mmap(NULL, num_pages*PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE| MAP_POPULATE, -1, 0);
+    char* mem;
+    int offset =0;
+    while(1){
 
-    while(!check_consecutive(mem,num_pages*PAGE_SIZE)){
-        mem =  (char *) mmap(NULL, num_pages*PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE| MAP_POPULATE, -1, 0);
-    }
+        do{
+            mem =  (char *) mmap(NULL, num_pages*PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE| MAP_POPULATE, -1, 0);
+        }while(!check_consecutive(mem,num_pages*PAGE_SIZE));
+            
+        
+        
+        // row conflict timing
+
     
-    // row conflict timing
 
-   
+        // DramAddr* dram = (DramAddr*) malloc(sizeof(DramAddr));
+        // dram_address(get_physical_addr((uintptr_t) mem), dram);
+        // printf("page 0 memory\n");
+        // printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
+        // printf("---------------------------------------------------------------\n");
 
-    // DramAddr* dram = (DramAddr*) malloc(sizeof(DramAddr));
-    // dram_address(get_physical_addr((uintptr_t) mem), dram);
-    // printf("page 0 memory\n");
-    // printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
-    // printf("---------------------------------------------------------------\n");
+        
+        uint64_t phys;
+        for(int i=2; i<34; i+=2){
+            u_int64_t acc_time = 0;
+            u_int64_t time;
+            int j=0;
+            while(j<8000){
+                time = row_conflict_time((u_int64_t) (mem), (u_int64_t) (mem + i*PAGE_SIZE));
+                if(time > 1000){continue;}
+                j++;
+                acc_time+=time;
+            }
+            acc_time = acc_time/8000;
+            printf("Page %d (%lx) Acc Time: %ld\n", i, get_physical_addr((uintptr_t) (mem + i*PAGE_SIZE)),acc_time);
+            if(acc_time > ROW_CONFLICT_TH){
+                printf("Found conflict\n");
+                offset = i;
+            }
+            
+            // if(acc_time > 300){
+            //     printf("%lu\n",acc_time);
+            //     phys = get_physical_addr((uintptr_t) (mem+i*PAGE_SIZE));
+            //     dram_address(phys, dram);
+            //     printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
+            //     printf("%lx\n",phys);
+            //     printf("--------------------------\n");
 
-    uint64_t phys;
-    for(int i=1; i<num_pages; i+=2){
-        u_int64_t acc_time = 0;
-        u_int64_t time;
-        int j=0;
-        while(j<8000){
-            time = row_conflict_time((u_int64_t) (mem), (u_int64_t) (mem + i*PAGE_SIZE));
-            if(time > 1000){continue;}
-            j++;
-            acc_time+=time;
+            // }
+            
+        
         }
-        acc_time = acc_time/8000;
-        printf("Page %d (%lx) Acc Time: %ld\n", i, get_physical_addr((uintptr_t) (mem + i*PAGE_SIZE)),acc_time);
-        
-        // if(acc_time > 300){
-        //     printf("%lu\n",acc_time);
-        //     phys = get_physical_addr((uintptr_t) (mem+i*PAGE_SIZE));
-        //     dram_address(phys, dram);
-        //     printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
-        //     printf("%lx\n",phys);
-        //     printf("--------------------------\n");
 
-        // }
-        
-       
+        if(offset<32){
+            munmap(mem,num_pages*PAGE_SIZE);
+        }else{
+            break;
+        }
     }
+
+    printf("Found offset >= 30\n");
+    // all the pages up to offset -1 are in the banks that will be probed
+
+    char* addresses[16];
+
+    for(int i=0; i<16; i++){
+        addresses[i] = mem + PAGE_SIZE*(i*2);
+    }
+
+    // PROBE(F+R)
+    // int acc_times[16];
+    // for(int i=0; i<16; i++){
+    //     acc_times[i] = probe(addresses[i]);
+    // }
+
+    // for(int i=0; i<16; i++){
+    //     printf("%d\n", acc_times[i]);
+    // }
+
+    uint64_t acc_times[16000];
+
+    // probe every 2ms cycles
+    uint64_t start = rdtscp();
+    int num =0;
+    while((rdtscp() < start + (0x00030000)) && (num < 1000)){
+        for(int i=0; i<16; i++){
+            acc_times[num*16 + i] = probe(addresses[i]);
+        }
+    }
+
+    for(int j=0; j< 1000;j++ ){
+        for(int i=0; i<16; i++){
+            if(i<15){
+                if(acc_times[j*16 + i] < ROW_CONFLICT_TH){
+                    printf("1,");
+                }else{
+                    printf("0,");
+                }
+            }else{
+                if(acc_times[j*16 + i] < ROW_CONFLICT_TH){
+                    printf("1");
+                }else{
+                    printf("0");
+                }
+            }
+        }
+        printf("\n");
+    }
+
+
+
+
+
+    
+
+
+
+
+
+
 
    
 
