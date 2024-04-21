@@ -247,11 +247,11 @@ void main(void){
                 acc_time+=time;
             }
             acc_time = acc_time/8000;
-            printf("Page %d (%lx) Acc Time: %ld\n", i, get_physical_addr((uintptr_t) (mem + i*PAGE_SIZE)),acc_time);
+            // printf("Page %d (%lx) Acc Time: %ld\n", i, get_physical_addr((uintptr_t) (mem + i*PAGE_SIZE)),acc_time);
             if(acc_time > ROW_CONFLICT_TH){
-                printf("Found conflict\n");
+                // printf("Found conflict\n");
                 offset = i;
-                printf("Offset %d\n", offset);
+                // printf("Offset %d\n", offset);
                 break;
             }
             
@@ -275,7 +275,7 @@ void main(void){
         }
     }
 
-    printf("Found offset >= 30\n");
+    // printf("Found offset >= 30\n");
     // all the pages up to offset -1 are in the banks that will be probed
 
     char* addresses[15];
@@ -283,7 +283,7 @@ void main(void){
     for(int i=0; i<15; i++){
         addresses[i] = mem + PAGE_SIZE*(i*2);
     }
-    printf("here");
+    // printf("here");
 
     // PROBE(F+R)
     // int acc_times[16];
