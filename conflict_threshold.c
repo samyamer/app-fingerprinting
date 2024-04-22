@@ -128,16 +128,16 @@ int probe(char* addr){
 
 
 // // Haswell 1 channel 1 dimms
-//  void dram_address(u_int64_t phys_addr, DramAddr* addr){
-//     addr->BA0 = ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<17) >> 17);
-//     addr->BA1 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<18) >> 18);
-//     addr->BA2 = ((phys_addr & 1<<16) >> 16) ^ ((phys_addr & 1<<20) >> 20);
-//     addr->rank = ((phys_addr & 1<<15) >> 15) ^ ((phys_addr & 1<<19) >> 19);
-//     addr->dimm = 0;
-//     addr->channel = 0;
+ void dram_address(u_int64_t phys_addr, DramAddr* addr){
+    addr->BA0 = ((phys_addr & 1<<13) >> 13) ^ ((phys_addr & 1<<17) >> 17);
+    addr->BA1 = ((phys_addr & 1<<14) >> 14) ^ ((phys_addr & 1<<18) >> 18);
+    addr->BA2 = ((phys_addr & 1<<16) >> 16) ^ ((phys_addr & 1<<20) >> 20);
+    addr->rank = ((phys_addr & 1<<15) >> 15) ^ ((phys_addr & 1<<19) >> 19);
+    addr->dimm = 0;
+    addr->channel = 0;
     
-//     return;
-// }
+    return;
+}
 
 // // // Haswell 1 channel 2 dimms
 // //  void dram_address(u_int64_t phys_addr, DramAddr* addr){
@@ -260,7 +260,7 @@ void main(void){
             //     phys = get_physical_addr((uintptr_t) (mem+i*PAGE_SIZE));
             //     dram_address(phys, dram);
             //     printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
-            //     printf("%lx\n",phys);
+                // printf("%lx\n",phys);
             //     printf("--------------------------\n");
 
             // }
@@ -284,6 +284,18 @@ void main(void){
         addresses[i] = mem + PAGE_SIZE*(i*2);
     }
     // printf("here");
+    printf("-------------Banks-----------------\n");
+    uint64_t phys;
+    DramAddr* dram = (DramAddr*)malloc(sizeof(DramAddr));
+    for(int i=0; i< 15; i++){
+            phys = get_physical_addr((uintptr_t) addresses[i]);
+            dram_address(phys, dram);
+            printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
+            printf("%lx\n",phys);
+            printf("---------------------------------------\n");
+        
+    }
+    exit(0);
 
     // PROBE(F+R)
     // int acc_times[16];
