@@ -283,19 +283,19 @@ void main(void){
     for(int i=0; i<15; i++){
         addresses[i] = mem + PAGE_SIZE*(i*2);
     }
-    // printf("here");
-    printf("-------------Banks-----------------\n");
-    uint64_t phys;
-    DramAddr* dram = (DramAddr*)malloc(sizeof(DramAddr));
-    for(int i=0; i< 15; i++){
-            phys = get_physical_addr((uintptr_t) addresses[i]);
-            dram_address(phys, dram);
-            printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
-            printf("%lx\n",phys);
-            printf("---------------------------------------\n");
+    // // printf("here");
+    // printf("-------------Banks-----------------\n");
+    // uint64_t phys;
+    // DramAddr* dram = (DramAddr*)malloc(sizeof(DramAddr));
+    // for(int i=0; i< 15; i++){
+    //         phys = get_physical_addr((uintptr_t) addresses[i]);
+    //         dram_address(phys, dram);
+    //         printf("BA0:%lx BA1:%lx BA2:%lx rank:%lx channel:%lx dimm:%lx\n", dram->BA0,dram->BA1, dram->BA2, dram->rank,dram->channel, dram->dimm);
+    //         printf("%lx\n",phys);
+    //         printf("---------------------------------------\n");
         
-    }
-    exit(0);
+    // }
+    // exit(0);
 
     // PROBE(F+R)
     // int acc_times[16];

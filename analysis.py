@@ -5,7 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.svm import SVC
 
-sites = {"AMZN":0,"BKNG":1, "CHESS":2, "DDG":3, "GIT":4, "GOGL":5, "TKTK":6, "WKPDA":7,"X":8,"YT":9}
+sites = {"AMZN":0,"BKNG":1, "CHESS":2, "DDG":3, "GIT":4, "GOGL":5, "TKTK":6, "WKPDA":7,"X":8,"YT":9, "YT-LQ":10}
 
 
 X = np.zeros((110,375000))

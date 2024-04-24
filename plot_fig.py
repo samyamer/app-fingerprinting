@@ -2,7 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 
-website = "GOGL"
+website = "YT-LQ"
 
 for v in range(10):
     filename = "./" + website + "/" + str(v) + ".txt"
