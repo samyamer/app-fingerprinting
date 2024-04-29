@@ -4,8 +4,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
 
-sites = {"AMZN":0,"BKNG":1, "CHESS":2, "DDG":3, "GIT":4, "GOGL":5, "TKTK":6, "WKPDA":7,"X":8,"YT":9, "YT-LQ":10}
+sites = {"AMZN":0,"BKNG":1, "CHESS":2, "DDG":3, "GIT":4, "GOGL":5, "TKTK":6, "WKPDA":7,"X":8,"YT":9}
 
 
 X = np.zeros((110,375000))
@@ -50,6 +51,7 @@ print("\nClassification Report:\n", classification_report(Y_test, y_pred))
 print("--------------SVM-----------------")
 
 svm = SVC(kernel='linear', random_state=42)  
+
 svm.fit(X_train, Y_train)
 
 
@@ -60,3 +62,14 @@ print("Accuracy:", accuracy_score(Y_test, y_pred))
 print("Classification Report:", classification_report(Y_test, y_pred))
 
 
+print("--------------MLPC-----------------")
+
+mlpc = MLPClassifier(hidden_layer_sizes=(100,), activation='relu', solver='adam', random_state=42)
+
+
+mlpc.fit(X_train, Y_train)
+
+y_pred = mlpc.predict(X_test)
+
+print("Accuracy:", accuracy_score(Y_test, y_pred))
+print("\nClassification Report:\n", classification_report(Y_test, y_pred))
